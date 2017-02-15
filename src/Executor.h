@@ -15,21 +15,25 @@ using namespace std;
 
 class Executor {
 private:
-	vector<Input*> cmdVec;
-	vector<Input*> cnctVec;
-	char lgn[256];
-	char hostName[256];
+	vector<Input*> cmdVec; //Stores current set of Commands
+	vector<Input*> cnctVec; //Stores current set of Connectors
+	char lgn[256]; //Stores userlogin
+	char hostName[256]; //Stores the host name
 
 
 public:
-	void init() {
-		getlogin_r(lgn, 256);
-
-		cout << lgn << "$ ";
+	void init() { //Initializes the shell
+		cout << "Welcome to rshell - By Brennan Hall & Vanessa Le" << endl;
+		getlogin_r(lgn, 256); //Retreives userlogin from the system
+		if (lgn[0] == '\0') //Error checks a null stream
+			perror("Login detection failed");
+		gethostname(hostName, 256);
+		if (hostName[0] == '\0')
+			perror("hostname detection failed");
 	}
 
 	string getInput() {
-
+		cout << lgn << "@" << hostName << "$ " << endl;
 	}
 
 	void parseInput(string userInput) {

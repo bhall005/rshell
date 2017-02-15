@@ -14,5 +14,6 @@ int main() {
 
 	shell.init();
 
+	cout << "hllo" << endl;
 	return 0;
 }
