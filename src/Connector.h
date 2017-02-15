@@ -3,13 +3,12 @@
 
 #include "Input.h"
 
-class Connector {
+class Connector : public Input {
+protected:
+	Command* rightCmd;
 public:
-	Connector(bool leftFail, bool rightFail) : leftFail(leftFail), rightFail(rightFail) {}
-	bool leftFail;
-	bool rightFail;
-private:
-	virtual void execute() = 0;
+	Connector(Command* right) : rightCmd(right) {}
+	virtual bool execute(bool leftPass) = 0;
 
 }
 

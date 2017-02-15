@@ -12,11 +12,11 @@
 using namespace std;
 
 class Input {
-public:
+protected:
 	string data;
-private:
-	Input(string data) : data(data) {}
-	virtual void execute() = 0;
+public:
+	Input(string d) : data(d) {}
+	virtual bool execute() = 0;
 
 };
 

@@ -3,15 +3,10 @@
 
 #include "Input.h"
 
-class Command {
+class Command : public Input {
 public:
-	Command() {}
-	bool failed;
-private:
-	virtual void execute() = 0;
-	void setFail(bool failure) {
-		failed = failure;
-	}
+	Command(string data) : Input(data) {}
+	virtual bool execute() = 0;
 }
 
 #endif
