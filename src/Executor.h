@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sstream>
 #include <vector>
 #include <unistd.h>
 #include <sys/types.h>
@@ -43,40 +44,87 @@ public:
 		cout << lgn << "@" << hostName << "$ "; //Console message
 		cin.getline(str, 256);
 		
-		this->parseCommands(str);
-		this->parseConnectors(str);
+		this->parseInput(str);
 
 		for (unsigned i = 0; i < cmdVec.size(); i++)
 			cout << cmdVec.at(i)->getData() << endl;
 	}
 
-	void parseCommands(char* str) {
-		char* point;
-		point = strtok(str, ";|&");
+	void parseInput(string input) {
+		stringstream lineStream(input);
+		char curChar;
+		string newCommand;
+		string charBuffer;
 
-		while(point != NULL) {
-			if(strrchr(point, '#') != NULL) {
-				Command* tmp = new Command(strtok(point, "#"));
-				cmdVec.push_back(tmp);
-				/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
-				break;
+		while(lineStream >> noskipws >> curChar) {
+			if (curChar != ' ' && curChar != ';' && curChar != '&'
+				&& curChar != '|' && curChar != '#') {
+				if (!charBuffer.empty() && newCommand.empty()) {
+					newCommand.push_back(curChar);
+					charBuffer.clear();
+				}
+				else if (!charBuffer.empty() && !newCommand.empty()) {
+					charBuffer.push_back(curChar);
+					newCommand += charBuffer;
+					charBuffer.clear();
+				}
+				else
+					newCommand.push_back(curChar);
 			}
+			else if (curChar == ' ') {
+				charBuffer.push_back(curChar);
+			}
+			else if (curChar == ';' || curChar == '&'
+				|| curChar == '|' || curChar == '#') {
+				charBuffer.clear();
+				if (!newCommand.empty()) {
+				Command* tmp = new Command(newCommand);
+	 			cmdVec.push_back(tmp);
+	 			/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
+	 			if (curChar == '|')
+	 				cout << "||" << endl;
+	 				//CREATE NEW OR THAT POINTS AT THE RIGHT COMMAND
+	 			else if (curChar == '&')
+	 				cout << "&&" << endl;
+	 			else if (curChar == ';')
+	 				cout << ";" << endl;
+	 			else if (curChar == '#')
+	 				break;
 
-			Command* tmp = new Command(point);
-			cmdVec.push_back(tmp);
-			/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
-			point = strtok(NULL, ";|&");
+	 			newCommand.clear();
+	 			charBuffer.clear();
+	 			}
+			}
 		}
 	}
 
-	void parseConnectors(char* str) {
-		int safariVal = 0;
-		for (unsigned i = 0; i < cmdVec.size(); i++) {
-			safariVal += cmdVec.at(i)->getData().size();
-			char checkChar = *(str + safariVal);
-			cout << checkChar << endl;
-		}
-	}
+	// void parseCommands(char* str) {
+	// 	char* point;
+	// 	point = strtok(str, ";|&");
+
+	// 	while(point != NULL) {
+	// 		if(strrchr(point, '#') != NULL) {
+	// 			Command* tmp = new Command(strtok(point, "#"));
+	// 			cmdVec.push_back(tmp);
+	// 			/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
+	// 			break;
+	// 		}
+
+	// 		Command* tmp = new Command(point);
+	// 		cmdVec.push_back(tmp);
+	// 		/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
+	// 		point = strtok(NULL, ";|&");
+	// 	}
+	// }
+
+	// void parseConnectors(char* str) {
+	// 	int safariVal = 0;
+	// 	for (unsigned i = 0; i < cmdVec.size(); i++) {
+	// 		safariVal += cmdVec.at(i)->getData().size();
+	// 		char checkChar = *(str + safariVal);
+	// 		cout << checkChar << endl;
+	// 	}
+	// }
 };
 
 
