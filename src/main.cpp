@@ -13,7 +13,7 @@ int main() {
 	Executor shell;
 
 	shell.init();
+	shell.getInput();
 
-	cout << "hllo" << endl;
 	return 0;
 }

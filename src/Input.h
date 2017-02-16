@@ -17,6 +17,7 @@ protected:
 public:
 	Input(string d) : data(d) {}
 	virtual bool execute() = 0;
+	string getData() {return data;}
 
 };
 

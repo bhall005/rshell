@@ -6,7 +6,10 @@
 class Command : public Input {
 public:
 	Command(string data) : Input(data) {}
-	virtual bool execute() = 0;
-}
+	/*RESET TO VITRUAL WHEN EXECUTABLES & EXITS HAVE BEEN DELINIATED*/
+	bool execute() { 
+		return true; 
+	}
+};
 
 #endif

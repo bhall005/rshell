@@ -3,12 +3,11 @@
 
 class Or : public Connector {
 public:
-	void execute() {
-		if(leftFail){
-			//execute the right command
-		}	
+	bool execute(bool leftPass) {
+		//execute right command is left command fails
+		return true; //FIXME
 	}
 
-}
+};
 
 #endif

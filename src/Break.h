@@ -3,9 +3,10 @@
 
 class Break : public Connector {
 public:
-	void execute() {
-		//execute right command after left command is finished
+	bool execute(bool leftPass) {
+		//execute right command after left command
+		return true; //FIXME
 	}
-}
+};
 
 #endif
