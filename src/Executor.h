@@ -17,7 +17,7 @@
 #include "And.h"
 #include "Break.h"
 #include "Or.h"
-#include "Executible.h"
+#include "Executable.h"
 #include "Exit.h"
 
 using namespace std;
@@ -62,7 +62,7 @@ private:
 						cmdVec.push_back(tmp);
 					}
 					else {
-						Command* tmp = new Executible(newCommand);
+						Command* tmp = new Executable(newCommand);
 						cmdVec.push_back(tmp);
 					}
 	 			if (curChar == '|') {
@@ -100,7 +100,7 @@ private:
 				cmdVec.push_back(tmp);
 			}
 			else {
-				Command* tmp = new Executible(newCommand);
+				Command* tmp = new Executable(newCommand);
 				cmdVec.push_back(tmp);
 			}
 	 	}
@@ -157,13 +157,13 @@ public:
 	// 		if(strrchr(point, '#') != NULL) {
 	// 			Command* tmp = new Command(strtok(point, "#"));
 	// 			cmdVec.push_back(tmp);
-	// 			/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
+	// 			/*FIX TO ACCOUNT FOR ExecutableS AND EXITS*/
 	// 			break;
 	// 		}
 
 	// 		Command* tmp = new Command(point);
 	// 		cmdVec.push_back(tmp);
-	// 		/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
+	// 		/*FIX TO ACCOUNT FOR ExecutableS AND EXITS*/
 	// 		point = strtok(NULL, ";|&");
 	// 	}
 	// }

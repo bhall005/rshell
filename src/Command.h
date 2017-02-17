@@ -2,7 +2,6 @@
 #define COMMAND_H
 
 #include "Input.h"
-#include "Command.h"
 
 class Command : public Input {
 public:
