@@ -17,6 +17,8 @@
 #include "And.h"
 #include "Break.h"
 #include "Or.h"
+#include "Executible.h"
+#include "Exit.h"
 
 using namespace std;
 
@@ -26,29 +28,6 @@ private:
 	vector<Connector*> cnctVec; //Stores current set of Connectors
 	char lgn[256]; //Stores userlogin
 	char hostName[256]; //Stores the host name
-
-
-public:
-	void init() { //Initializes the shell
-		cout << "Welcome to rshell - By Brennan Hall & Vanessa Le" << endl;
-		getlogin_r(lgn, 256); //Retreives userlogin from the system
-		if (lgn[0] == '\0') //Error checks a null stream
-			perror("Login detection failed");
-		gethostname(hostName, 256); //Retrieves hostname from system
-		if (hostName[0] == '\0') //Error checks a null stream
-			perror("hostname detection failed");
-	}
-
-	void getInput() {
-		char str[256]; //Cstring to store userinput
-		cout << lgn << "@" << hostName << "$ "; //Console message
-		cin.getline(str, 256);
-		
-		this->parseInput(str);
-
-		for (unsigned i = 0; i < cmdVec.size(); i++)
-			cout << cmdVec.at(i)->getData() << endl;
-	}
 
 	void parseInput(string input) {
 		stringstream lineStream(input);
@@ -78,24 +57,96 @@ public:
 				|| curChar == '|' || curChar == '#') {
 				charBuffer.clear();
 				if (!newCommand.empty()) {
-				Command* tmp = new Command(newCommand);
-	 			cmdVec.push_back(tmp);
-	 			/*FIX TO ACCOUNT FOR EXECUTIBLES AND EXITS*/
-	 			if (curChar == '|')
-	 				cout << "||" << endl;
+					if (newCommand == "exit") {
+						Command* tmp = new Exit();
+						cmdVec.push_back(tmp);
+					}
+					else {
+						Command* tmp = new Executible(newCommand);
+						cmdVec.push_back(tmp);
+					}
+	 			if (curChar == '|') {
+	 				//cout << "||" << endl;
+	 				Connector* tmp = new Or();
+	 				cnctVec.push_back(tmp);
 	 				//CREATE NEW OR THAT POINTS AT THE RIGHT COMMAND
-	 			else if (curChar == '&')
-	 				cout << "&&" << endl;
-	 			else if (curChar == ';')
-	 				cout << ";" << endl;
-	 			else if (curChar == '#')
-	 				break;
+	 			}
+	 			else if (curChar == '&') {
+	 				//cout << "&&" << endl;
+	 				Connector* tmp = new And();
+	 				cnctVec.push_back(tmp);
+	 			}
+	 			else if (curChar == ';') {
+	 				//cout << ";" << endl;
+	 				Connector* tmp = new Break();
+	 				cnctVec.push_back(tmp);
+	 			}
+	 			else if (curChar == '#') {
+	 				newCommand.clear();
+	 				return;
+	 			}
 
 	 			newCommand.clear();
 	 			charBuffer.clear();
 	 			}
+	 			else
+	 				if (curChar == '#')
+	 					return;
 			}
 		}
+		if (!newCommand.empty()) {
+			if (newCommand == "exit") {
+				Command* tmp = new Exit();
+				cmdVec.push_back(tmp);
+			}
+			else {
+				Command* tmp = new Executible(newCommand);
+				cmdVec.push_back(tmp);
+			}
+	 	}
+	}
+
+	void fillConnectors() {
+		unsigned vecBound = 0;
+		if (cmdVec.size() > cnctVec.size())
+			vecBound = cnctVec.size();
+		else 
+			vecBound = cnctVec.size() - 1;
+		for (unsigned i = 0; i < vecBound; ++i) {
+			cnctVec.at(i)->setCmd(cmdVec.at(i + 1));
+			//cout << i << " points to " << cnctVec.at(i)->getCmd() << endl;
+		}
+	}
+
+public:
+	void init() { //Initializes the shell
+		cout << "Welcome to rshell - By Brennan Hall & Vanessa Le" << endl;
+		getlogin_r(lgn, 256); //Retreives userlogin from the system
+		if (lgn[0] == '\0') //Error checks a null stream
+			perror("Login detection failed");
+		gethostname(hostName, 256); //Retrieves hostname from system
+		if (hostName[0] == '\0') //Error checks a null stream
+			perror("hostname detection failed");
+	}
+
+	void getInput() {
+		char str[256]; //Cstring to store userinput
+		cout << lgn << "@" << hostName << "$ "; //Console message
+		cin.getline(str, 256);
+		
+		this->parseInput(str);
+		this->fillConnectors();
+
+		// for (unsigned i = 0; i < cmdVec.size(); i++)
+		// 	cout << '\"' << cmdVec.at(i)->getData() << '\"' << endl;
+	}
+
+	void execute() {
+		bool lastPass = cmdVec.at(0)->execute();
+
+		if (cnctVec.size() > 0)
+			for(unsigned i = 0; i < cnctVec.size(); i++)
+				lastPass = cnctVec.at(i)->execute(lastPass);
 	}
 
 	// void parseCommands(char* str) {

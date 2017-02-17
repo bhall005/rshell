@@ -14,6 +14,7 @@ int main() {
 
 	shell.init();
 	shell.getInput();
+	shell.execute();
 
 	return 0;
 }

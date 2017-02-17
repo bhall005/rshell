@@ -2,14 +2,12 @@
 #define COMMAND_H
 
 #include "Input.h"
+#include "Command.h"
 
 class Command : public Input {
 public:
 	Command(string data) : Input(data) {}
-	/*RESET TO VITRUAL WHEN EXECUTABLES & EXITS HAVE BEEN DELINIATED*/
-	bool execute() { 
-		return true; 
-	}
+	virtual bool execute() = 0;
 };
 
 #endif
