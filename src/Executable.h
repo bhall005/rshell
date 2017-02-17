@@ -15,11 +15,18 @@ public:
             pid_t endPID;
             
             if (pid == 0) {
+                  char** temp = new char*[data.size() + 1];
+                  unsigned i = 0;
                   
-                  //execvp requires name of file to be executed and char** (similar to main) 
-                  //if(execvp(filename, data)){
-                  //      return true;
-                  //}
+                  for(i = 0; i < data.size(); ++i){
+                        temp[i] = new char[data.at(i)];
+                  }
+                  temp[i] = NULL;
+                  
+                  
+                  if(execvp(temp[0], temp)){
+                        return true;
+                  }
                   return false;
             }
             else if(pid == -1){
