@@ -35,7 +35,7 @@ private:
 		string newCommand;
 		string charBuffer;
 
-		while(lineStream >> noskipws >> curChar) {
+		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
 				&& curChar != '|' && curChar != '#') {
 				if (!charBuffer.empty() && newCommand.empty()) {
@@ -66,18 +66,14 @@ private:
 						cmdVec.push_back(tmp);
 					}
 	 			if (curChar == '|') {
-	 				//cout << "||" << endl;
 	 				Connector* tmp = new Or();
 	 				cnctVec.push_back(tmp);
-	 				//CREATE NEW OR THAT POINTS AT THE RIGHT COMMAND
 	 			}
 	 			else if (curChar == '&') {
-	 				//cout << "&&" << endl;
 	 				Connector* tmp = new And();
 	 				cnctVec.push_back(tmp);
 	 			}
 	 			else if (curChar == ';') {
-	 				//cout << ";" << endl;
 	 				Connector* tmp = new Break();
 	 				cnctVec.push_back(tmp);
 	 			}
@@ -114,7 +110,6 @@ private:
 			vecBound = cnctVec.size() - 1;
 		for (unsigned i = 0; i < vecBound; ++i) {
 			cnctVec.at(i)->setCmd(cmdVec.at(i + 1));
-			//cout << i << " points to " << cnctVec.at(i)->getCmd() << endl;
 		}
 	}
 
@@ -136,31 +131,20 @@ public:
 		
 		this->parseInput(str);
 		this->fillConnectors();
-
-		// for (unsigned i = 0; i < cmdVec.size(); i++)
-		// 	cout << '\"' << cmdVec.at(i)->getData() << '\"' << endl;
 	}
 
 	void execute() {
 		bool lastPass = cmdVec.at(0)->execute();
 
-		if (cnctVec.size() > 0)
-			for(unsigned i = 0; i < cnctVec.size(); i++)
+		if (cnctVec.size() > 0) {
+			for(unsigned i = 0; i < cnctVec.size(); i++) {
 				lastPass = cnctVec.at(i)->execute(lastPass);
-			
+			}
+		}
+		
 		cnctVec.clear();
 		cmdVec.clear();
 	}
 };
-
-
-
-
-
-
-
-
-
-
 
 #endif

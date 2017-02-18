@@ -14,7 +14,7 @@ public:
             pid_t pid = fork();
             
             // Checking whether fork() was sucessful.
-            if(pid < 0) {
+            if (pid < 0) {
                   perror("The forking process failed");
                   return false;
             }
@@ -22,7 +22,7 @@ public:
             // If in the child process, we will execute the command.
             if (pid == 0) {
                   // Convert the string data to a char[]
-                  char str[256];
+                  char str[data.length()];
                   int words = 1;
                   for(unsigned i = 0; i < data.length(); i++) {
                         str[i] = data.at(i);
@@ -30,12 +30,11 @@ public:
                               words++;
                         }
                   }
-                  str[data.length()] = '\0';
-
+            
                   // Convert the char[] to a char** for use in execvp()
                   char * argument;
                   argument = strtok (str, " ");
-                  char** arr = new char*[words + 1];
+                  char** arr = new char*[words];
                   unsigned j = 0;
                   
                   while (argument != NULL) {
@@ -45,13 +44,23 @@ public:
                         argument = strtok(NULL, " ");
                   } 
                   
-                  arr[words] = NULL;
-
-                  // Call execvp() to execute the command and return true if successful
+                  // Call execvp() to execute the command
                   int executed = execvp(arr[0], arr);
+                  
                   if(executed == -1){
-                        // If execvp() is not successful, return false
+                       // If execvp() is not successful, return false
                         perror("An error occured while executing an argument");
+                        pid_t endPID = waitpid(pid, &status, 0);
+                        while (endPID != pid){
+                              // Continue to check whether waitpid() was unsuccessful
+                              if(endPID == -1) {
+                                    perror("There was an error calling waitpid on a parent process");
+                                    return false;
+                              }
+
+                              // Continue to call waitpid() while waiting
+                              endPID = waitpid(pid, &status, 0);
+                        }
                         return false;
                   }
                   
@@ -59,12 +68,12 @@ public:
             }
             
             // If in the parent process, call waitpid()
-            if(pid > 0) {
+            if (pid > 0) {
                   int status;
                   pid_t endPID = waitpid(pid, &status, 0);
                   
                   // Check whether waitpid() was unsuccessful
-                  if(endPID == -1){
+                  if (endPID == -1){
                         perror("There was an error calling waitpid on a parent process");
                         return false;
                   }
@@ -89,7 +98,6 @@ public:
                   perror("The child process for an executable did not exit normally");
                   return false;
             }
-            return false;
       }
 };
 
