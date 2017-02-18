@@ -1,10 +1,5 @@
 # rshell
 ---
-
-
-
-# Description
----
 This program prints a command prompt and reads in a line of commands. The command prompt is printed in the format username@hostname$, and the user can type in a single command or a chain of commands by using the connectors ||, &&, or ;. The connectors will determine whether to run the command on the right based on the success of the command on the left.
 
 * || will run the next command if the previous command fails.
