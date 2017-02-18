@@ -7,13 +7,13 @@
 class And : public Connector {
 public:
 	bool execute(bool leftPass) {
-		cout << "I'm an and, ";
+		// Check whether the executable on the left succeeeded
+		// If yes, execute the command on the right
+		// If not, do not execute the right command and return false
 		if (leftPass) {
-			cout << "executing: " << rightCmd->getData() << endl;
 			return this->rightCmd->execute();
 		}
 		else {
-			cout << "not executing: " << rightCmd->getData() << endl;
 			return false;
 		}
 	}
