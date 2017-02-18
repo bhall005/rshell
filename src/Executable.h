@@ -22,7 +22,7 @@ public:
             // If in the child process, we will execute the command.
             if (pid == 0) {
                   // Convert the string data to a char[]
-                  char str[data.length()];
+                  char str[256];
                   int words = 1;
                   for(unsigned i = 0; i < data.length(); i++) {
                         str[i] = data.at(i);
@@ -30,11 +30,12 @@ public:
                               words++;
                         }
                   }
-            
+                  str[data.length()] = '\0';
+
                   // Convert the char[] to a char** for use in execvp()
                   char * argument;
                   argument = strtok (str, " ");
-                  char** arr = new char*[words];
+                  char** arr = new char*[words + 1];
                   unsigned j = 0;
                   
                   while (argument != NULL) {
@@ -44,14 +45,17 @@ public:
                         argument = strtok(NULL, " ");
                   } 
                   
+                  arr[words] = NULL;
+
                   // Call execvp() to execute the command and return true if successful
-                  if(execvp(arr[0], arr)){
-                        return true;
+                  int executed = execvp(arr[0], arr);
+                  if(executed == -1){
+                        // If execvp() is not successful, return false
+                        perror("An error occured while executing an argument");
+                        return false;
                   }
                   
-                  // If execvp() is not successful, return false
-                  perror("An error occured while executing an argument");
-                  return false;
+                  return true;
             }
             
             // If in the parent process, call waitpid()
@@ -85,6 +89,7 @@ public:
                   perror("The child process for an executable did not exit normally");
                   return false;
             }
+            return false;
       }
 };
 

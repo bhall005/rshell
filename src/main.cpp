@@ -15,8 +15,9 @@ int main() {
 
 	// Call the functions to initialize the shell, process the input, and execute the commands
 	shell.init();
-	shell.getInput();
-	shell.execute();
-
+	while(1) {
+		shell.getInput();
+		shell.execute();
+	}
 	return 0;
 }

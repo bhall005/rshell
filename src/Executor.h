@@ -147,35 +147,10 @@ public:
 		if (cnctVec.size() > 0)
 			for(unsigned i = 0; i < cnctVec.size(); i++)
 				lastPass = cnctVec.at(i)->execute(lastPass);
+			
+		cnctVec.clear();
+		cmdVec.clear();
 	}
-
-	// void parseCommands(char* str) {
-	// 	char* point;
-	// 	point = strtok(str, ";|&");
-
-	// 	while(point != NULL) {
-	// 		if(strrchr(point, '#') != NULL) {
-	// 			Command* tmp = new Command(strtok(point, "#"));
-	// 			cmdVec.push_back(tmp);
-	// 			/*FIX TO ACCOUNT FOR ExecutableS AND EXITS*/
-	// 			break;
-	// 		}
-
-	// 		Command* tmp = new Command(point);
-	// 		cmdVec.push_back(tmp);
-	// 		/*FIX TO ACCOUNT FOR ExecutableS AND EXITS*/
-	// 		point = strtok(NULL, ";|&");
-	// 	}
-	// }
-
-	// void parseConnectors(char* str) {
-	// 	int safariVal = 0;
-	// 	for (unsigned i = 0; i < cmdVec.size(); i++) {
-	// 		safariVal += cmdVec.at(i)->getData().size();
-	// 		char checkChar = *(str + safariVal);
-	// 		cout << checkChar << endl;
-	// 	}
-	// }
 };
 
 
