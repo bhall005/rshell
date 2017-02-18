@@ -4,6 +4,7 @@
 #include "Command.h"
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 class Executable : public Command {
 public:
