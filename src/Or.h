@@ -7,17 +7,16 @@
 class Or : public Connector {
 public:
 	bool execute(bool leftPass) {
-		cout << "I'm an or, ";
+		// Check whether the command on the left was executed successfully
+		// If not, call execute() on the command on the right and return that bool value
+		// If it did, return false
 		if (!leftPass) {
-			cout << "executing: " << rightCmd->getData() << endl;
 			return this->rightCmd->execute();
 		}
 		else {
-			cout << "not executing: " << rightCmd->getData() << endl;
 			return false;
 		}
 	}
-
 };
 
 #endif
