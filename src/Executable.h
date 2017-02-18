@@ -10,37 +10,56 @@ public:
       Executable(string data) : Command(data) {}
       
       bool execute(){
-            fork();
-            pid_t pid = getpid();
-            pid_t endPID;
+           // fork();
+           // pid_t pid = getpid();
+	pid_t pid = fork();
             
-            if (pid == 0) {
-                  char** temp = new char*[data.size() + 1];
-                  unsigned i = 0;
-                  
-                  for(i = 0; i < data.size(); ++i){
-                        temp[i] = new char[data.at(i)];
-                  }
-                  temp[i] = NULL;
-                  
-                  
-                  if(execvp(temp[0], temp)){
+	if(pid < 0) {
+		perror("The forking process failed");
+		return false;
+	}
+
+	if (pid == 0) {
+		char str[data.length()];
+		int words = 1;
+		for(unsigned i = 0; i < data.length(); i++) {
+			str[i] = data.at(i);
+			if(data.at(i) == ' '){
+				words++;
+			}
+		}
+		char * argument;
+		argument = strtok (str, " ");
+		char** arr = new char*[words];
+		unsigned j = 0;
+
+		while (argument != NULL) {
+			arr[j] = new char[strlen(argument)];
+			strcpy(arr[j], argument);
+			j++;
+			argument = strtok(NULL, " ");
+		} 
+                 
+                  if(execvp(arr[0], arr)){
                         return true;
                   }
+
+		perror("An error occured while executing an argument");
                   return false;
             }
-            else if(pid == -1){
-                  perror("The forking proccess for an executable has failed.");
-                  return false;
-            }
-            else {
+            
+
+	if(pid > 0) {
                   int status;
-                  endPID = waitpid(pid, &status, 0);
+                  pid_t endPID = waitpid(pid, &status, 0);
+		if(endPID == -1){
+			perror("There was an error calling waitpid on a parent process");
+			return false;
+		}
                   
                   while (endPID != pid){
-                        if(endPID == -1)
-                        {
-                              perror("There was an error calling waitpid on a parent process.");\
+                        if(endPID == -1) {
+                              perror("There was an error calling waitpid on a parent process");
                               return false;
                         }
                         
@@ -50,10 +69,9 @@ public:
                   if (WIFEXITED(status)){
                         return true;
                   }
-                  else {
-                        perror("The child process for an executable did not exit normally.");
-                        return false;
-                  }
+                  
+                  perror("The child process for an executable did not exit normally");
+                  return false;
             }
       }
 };
