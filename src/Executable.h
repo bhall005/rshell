@@ -23,7 +23,7 @@ public:
             // If in the child process, we will execute the command.
             if (pid == 0) {
                   // Convert the string data to a char[]
-                  char str[data.length() + 1];
+                  char str[256];
                   int words = 1;
                   for(unsigned i = 0; i < data.length(); i++) {
                         str[i] = data.at(i);
