@@ -103,6 +103,8 @@ private:
 	}
 
 	void fillConnectors() {
+		if (cmdVec.empty())
+			return;
 		unsigned vecBound = 0;
 		if (cmdVec.size() > cnctVec.size())
 			vecBound = cnctVec.size();
@@ -125,16 +127,21 @@ public:
 	}
 
 	void getInput() {
-		char str[256]; //Cstring to store userinput
-		cout << lgn << "@" << hostName << "$ "; //Console message
-		cin.getline(str, 256);
-		
+		string str; //Cstring to store userinput
+		//Console message
+		while(str.empty()) {
+			cout << lgn << "@" << hostName << "$ "; 	
+			getline(cin, str);
+		}
+	
 		this->parseInput(str);
 		this->fillConnectors();
 	}
 
 	void execute() {
-		bool lastPass = cmdVec.at(0)->execute();
+		bool lastPass = false;
+		if (cmdVec.size() > 0)
+			lastPass = cmdVec.at(0)->execute();
 
 		if (cnctVec.size() > 0) {
 			for(unsigned i = 0; i < cnctVec.size(); i++) {

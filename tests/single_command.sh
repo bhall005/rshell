@@ -1,2 +1,4 @@
-#!/bin/bash
-../bin/rshell
+echo  
+echo hello
+echo
+exit
