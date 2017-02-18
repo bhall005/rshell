@@ -44,14 +44,27 @@ public:
                         argument = strtok(NULL, " ");
                   } 
                   
-                  // Call execvp() to execute the command and return true if successful
-                  if(execvp(arr[0], arr)){
-                        return true;
+                  // Call execvp() to execute the command
+                  int executed = execvp(arr[0], arr);
+                  
+                  if(executed == -1){
+                       // If execvp() is not successful, return false
+                        perror("An error occured while executing an argument");
+                        pid_t endPID = waitpid(pid, &status, 0);
+                        while (endPID != pid){
+                              // Continue to check whether waitpid() was unsuccessful
+                              if(endPID == -1) {
+                                    perror("There was an error calling waitpid on a parent process");
+                                    return false;
+                              }
+
+                              // Continue to call waitpid() while waiting
+                              endPID = waitpid(pid, &status, 0);
+                        }
+                        return false;
                   }
                   
-                  // If execvp() is not successful, return false
-                  perror("An error occured while executing an argument");
-                  return false;
+                  return true;
             }
             
             // If in the parent process, call waitpid()
