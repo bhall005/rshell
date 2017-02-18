@@ -92,6 +92,8 @@ public:
                   perror("The child process for an executable did not exit normally");
                   return false;
             }
+            
+            return false;
       }
 };
 
