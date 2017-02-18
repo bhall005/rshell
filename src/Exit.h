@@ -8,7 +8,9 @@ class Exit : public Command {
 public:
 	Exit() : Command("exit") {}
 	bool execute() {
-		//WRITE CODE FOR EXITING
+		// Exit the shell
+		exit(0);
+		// Return false if exit() failed
 		return false;
 	}
 };
