@@ -7,15 +7,15 @@
 class Break : public Connector {
 public:
 	bool execute(bool leftPass) {
+		// Check whether there is a command on the right
+		// If so, execute it and return the bool value from calling the command's execute()
+		// If not, return false
 		if (rightCmd != NULL) {
-			cout << "I'm a break, executing: " << rightCmd->getData() << endl;
 			return this->rightCmd->execute();
 		}
 		else {
-			cout << "null" << endl;
 			return false;
 		}
-
 	}
 };
 
