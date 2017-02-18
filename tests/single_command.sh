@@ -1,4 +1,6 @@
-echo  
+#!/bin/bash
+
+echo "Testing echo hello and ls a"
 echo hello
-echo
-exit
+echo ls a
+echo exit
