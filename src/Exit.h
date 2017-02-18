@@ -3,6 +3,7 @@
 
 #include "Input.h"
 #include "Command.h"
+#include <stdlib.h>
 
 class Exit : public Command {
 public:
