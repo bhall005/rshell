@@ -12,6 +12,7 @@ public:
 		// Exit the shell
 		exit(0);
 		// Return false if exit() failed
+		perror("There was an error trying to exit the program);
 		return false;
 	}
 };
