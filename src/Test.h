@@ -19,24 +19,20 @@ public:
       
       bool execute(){
             struct stat path;
-            stat(data.c_str(), &path);
             
-            if (path.st_mode){
-                  if (e || (f && S_ISREG(path.st_mode)) || (d && S_ISDIR(path.st_mode))){
-                        cout << "(True)" << endl;
-                        return true;
-                  }
-                  else {
-                        cout << "error" << endl;
-                        return false;
-                  }
-            }
-            else{
+            if (stat(data.c_str(), &path) == -1){
                   cout << "(False)" << endl;
                   return false;
             }
-
-            return false;
+            
+            if ((e && path.st_mode) || (f && S_ISREG(path.st_mode)) || (d && S_ISDIR(path.st_mode))){
+                  cout << "(True)" << endl;
+                  return true;
+            }
+            else {
+                  cout << "(False)" << endl;
+                  return false;
+            }
       }
 };
 
