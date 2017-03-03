@@ -85,14 +85,17 @@ private:
 			      cmdVec.push_back(tmp);
 			}
 			else if (curChar == '(') {
-			      string parenthetical;
+			      char parenthetical[] = "";
+			      unsigned i = 0;
 			      while (lineStream >> noskipws >> curChar && curChar != ')') {
-			            parenthetical.push_back(curChar);
+			            parenthetical[i] = curChar;
+			            i++;
 			      }
 			      
+			      parenthetical[i] = '\0';
 			      cout << "parenthetical: " << parenthetical << endl;
 			      
-			      
+			      parseInput(parenthetical);
 			}
 			else if (curChar == ' ') {
 				charBuffer.push_back(curChar);
@@ -208,8 +211,10 @@ public:
 
 	void execute() {
 		bool lastPass = false;
-		if (cmdVec.size() > 0)
+		if (cmdVec.size() > 0) {
+		   
 			lastPass = cmdVec.at(0)->execute();
+		}
 
 		if (cnctVec.size() > 0) {
 			for(unsigned i = 0; i < cnctVec.size(); i++) {
