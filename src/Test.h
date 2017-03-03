@@ -9,23 +9,26 @@
 
 class Test : public Command {
 private:
-      bool e;
-      bool f;
-      bool d;
+      char flag;
 public:
       //assuming data is the path and flags are set in constructor
-      Test(string data) : Command(data), e(true), f(false), d(false) {}
-      Test(string data, bool e, bool f, bool d) : Command(data), e(e), f(f), d(d) {}
+      Test(string data) : Command(data), flag('e') {}
+      Test(string data, char flag) : Command(data), flag(flag) {}
       
       bool execute(){
             struct stat path;
+            
+            if (flag != 'e' && flag != 'f' && flag != 'd') {
+                  perror("The flag specified is not valid");
+                  return false;
+            }
             
             if (stat(data.c_str(), &path) == -1){
                   cout << "(False)" << endl;
                   return false;
             }
             
-            if ((e && path.st_mode) || (f && S_ISREG(path.st_mode)) || (d && S_ISDIR(path.st_mode))){
+            if ((flag == 'e' && path.st_mode) || (flag == 'f' && S_ISREG(path.st_mode)) || (flag == 'd' && S_ISDIR(path.st_mode))){
                   cout << "(True)" << endl;
                   return true;
             }
