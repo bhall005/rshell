@@ -19,6 +19,7 @@
 #include "Or.h"
 #include "Executable.h"
 #include "Exit.h"
+#include "Test.h"
 
 using namespace std;
 
@@ -37,7 +38,8 @@ private:
 
 		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
-				&& curChar != '|' && curChar != '#') {
+				&& curChar != '|' && curChar != '#' && curChar != '('
+				&& curChar != ')' && curChar != '[' && curChar != ']') {
 				if (!charBuffer.empty() && newCommand.empty()) {
 					newCommand.push_back(curChar);
 					charBuffer.clear();
@@ -50,6 +52,48 @@ private:
 				else
 					newCommand.push_back(curChar);
 			}
+			else if (curChar == '[') {
+			      string testCmd;
+			      while (lineStream >> noskipws >> curChar && curChar != ']') {
+			            testCmd.push_back(curChar);
+			      }
+			      
+			      char testCommand[] = "";
+			      char flag = 'e';
+			      bool pathBegins = false;
+			      
+			      unsigned i = 0;
+			      unsigned j = 0;
+			      
+			      while (testCmd[i + j] != '\0') {
+			            if(!pathBegins && testCmd[i + j] == ' ') {
+			                  j++;
+			            }
+			            else if(!pathBegins && testCmd[i + j] == '-' ){
+			                  flag = testCmd[i + j + 1];
+			                  j += 3;
+			                  pathBegins = true;
+			            }
+			            else {
+      			            testCommand[i] = testCmd[i + j];
+      			            i++;
+			            }
+			      }
+			      testCommand[i] = '\0';
+			      
+			      Command *tmp = new Test(testCommand, flag);
+			      cmdVec.push_back(tmp);
+			}
+			else if (curChar == '(') {
+			      string parenthetical;
+			      while (lineStream >> noskipws >> curChar && curChar != ')') {
+			            parenthetical.push_back(curChar);
+			      }
+			      
+			      cout << "parenthetical: " << parenthetical << endl;
+			      
+			      
+			}
 			else if (curChar == ' ') {
 				charBuffer.push_back(curChar);
 			}
@@ -57,37 +101,61 @@ private:
 				|| curChar == '|' || curChar == '#') {
 				charBuffer.clear();
 				if (!newCommand.empty()) {
+				      
 					if (newCommand == "exit") {
 						Command* tmp = new Exit();
 						cmdVec.push_back(tmp);
+					}
+					else if (strncmp(newCommand.c_str(), "test", 4) == 0) {
+					      char testCommand[] = "";
+					      char flag = 'e';
+					      
+					      unsigned i = 0;
+					      unsigned j = 5;
+					      
+					      if (newCommand[5] == '-') {
+					            flag = newCommand[6];
+					            j += 3;
+					      }
+					      
+					      while (newCommand[i + j] != '\0') {
+					            testCommand[i] = newCommand[i + j];
+					            i++;
+					      }
+					      
+					      testCommand[i] = '\0';
+					      
+					      Command *tmp = new Test(testCommand, flag);
+					      cmdVec.push_back(tmp);
 					}
 					else {
 						Command* tmp = new Executable(newCommand);
 						cmdVec.push_back(tmp);
 					}
-	 			if (curChar == '|') {
-	 				Connector* tmp = new Or();
-	 				cnctVec.push_back(tmp);
-	 			}
-	 			else if (curChar == '&') {
-	 				Connector* tmp = new And();
-	 				cnctVec.push_back(tmp);
-	 			}
-	 			else if (curChar == ';') {
-	 				Connector* tmp = new Break();
-	 				cnctVec.push_back(tmp);
+					
+      	 			if (curChar == '|') {
+      	 				Connector* tmp = new Or();
+      	 				cnctVec.push_back(tmp);
+      	 			}
+      	 			else if (curChar == '&') {
+      	 				Connector* tmp = new And();
+      	 				cnctVec.push_back(tmp);
+      	 			}
+      	 			else if (curChar == ';') {
+      	 				Connector* tmp = new Break();
+      	 				cnctVec.push_back(tmp);
+      	 			}
+      	 			else if (curChar == '#') {
+      	 				newCommand.clear();
+      	 				return;
+      	 			}
+      
+      	 			newCommand.clear();
+      	 			charBuffer.clear();
 	 			}
 	 			else if (curChar == '#') {
-	 				newCommand.clear();
-	 				return;
+	 			      return;
 	 			}
-
-	 			newCommand.clear();
-	 			charBuffer.clear();
-	 			}
-	 			else
-	 				if (curChar == '#')
-	 					return;
 			}
 		}
 		if (!newCommand.empty()) {
