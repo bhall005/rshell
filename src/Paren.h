@@ -16,8 +16,8 @@ public:
 	void setLength(int len) { this->cnctLength = len; }
 	int getLength() { return this->cnctLength; }
 
-	void setFirst(Command* first) { this->firstCmd = first; }
-	void push_back(Connector* tmp) { this->parenVec.push_back(tmp); }
+	void setFirst(Command* first) { firstCmd = first; }
+	void push_back(Connector* tmp) { parenVec.push_back(tmp); }
 	void clearData() {
 		this->cnctLength = 0;
 		parenVec.clear();
@@ -26,7 +26,7 @@ public:
 	bool isParen() { return true; }
 
 	bool execute() {
-		bool lastPass = this->firstCmd->execute();
+		bool lastPass = firstCmd->execute();
 
 		if (parenVec.size() > 0) {
 			for(unsigned i = 0; i < parenVec.size(); i++) {

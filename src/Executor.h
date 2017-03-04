@@ -152,10 +152,8 @@ private:
 	 					return;
 			}
 			if (curChar == ')' && parenIndex > -1) {
-				cout << "sadf" << endl;
 				Paren* parenTmp = new Paren();
 				parenTmp->setLength(cctLength);
-				cout << "sadf" << endl;
 				Command* tmp = parenTmp;
 				cmdVec.insert(cmdVec.begin() + parenIndex, tmp);
 				prpVec.push_back(parenTmp);
@@ -214,7 +212,7 @@ private:
 			return;
 		unsigned vecBound = 0;
 		if (cmdVec.size() > cnctVec.size())
-			vecBound = cnctVec.size();
+			vecBound = cmdVec.size() - 1;
 		else 
 			vecBound = cnctVec.size() - 1;
 		for (unsigned i = 0; i < vecBound; ++i) {
@@ -226,7 +224,9 @@ private:
 				int parIndex = i + 1;
 				++i;
 				Paren* parTmp = prpVec.at(parItr);
-				parTmp->setFirst(cmdVec.at(i + 1));
+				Command* newFirst = cmdVec.at(i + 1);
+				cout << newFirst->getData() << endl;
+				parTmp->setFirst(newFirst);
 
 				for (int m = 0; m < parTmp->getLength(); ++m) {
 					cnctVec.at(i)->setCmd(cmdVec.at(i + 2));
