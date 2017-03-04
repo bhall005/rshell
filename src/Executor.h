@@ -33,12 +33,13 @@ private:
 	void parseInput(string input) {
 		stringstream lineStream(input);
 		char curChar;
+		bool testFlag = false;
 		string newCommand;
 		string charBuffer;
 
 		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
-				&& curChar != '|' && curChar != '#') {
+				&& curChar != '|' && curChar != '#' && curChar != '[') {
 				if (!charBuffer.empty() && newCommand.empty()) {
 					newCommand.push_back(curChar);
 					charBuffer.clear();
@@ -55,9 +56,9 @@ private:
 				charBuffer.push_back(curChar);
 			}
 			else if (curChar == ';' || curChar == '&'
-				|| curChar == '|' || curChar == '#') {
+				|| curChar == '|' || curChar == '#' || curChar == '[') {
 				charBuffer.clear();
-				if (!newCommand.empty()) {
+				if (!newCommand.empty() || testFlag) {
 				      
 					if (newCommand == "exit") {
 						Command* tmp = new Exit();
@@ -105,6 +106,28 @@ private:
 
 	 			newCommand.clear();
 	 			charBuffer.clear();
+	 			testFlag = false;
+	 			}
+	 			else if (curChar == '[') {
+	 				string testCommand;
+	 				char flag = 'e';
+	 				while (lineStream >> noskipws >> curChar) {
+						if (curChar == '-') {
+							lineStream >> noskipws >> curChar;
+					    	flag = curChar;
+						}
+						else if (curChar != ' ' && curChar != ']')
+      						testCommand.push_back(curChar);
+      					else if (curChar == ']') {
+      						testFlag = true;
+      						break;
+      					}
+	 				}
+	 				Command *tmp = new Test(testCommand, flag);
+					cmdVec.push_back(tmp);
+
+					newCommand.clear();
+	 				charBuffer.clear();
 	 			}
 	 			else
 	 				if (curChar == '#')
@@ -151,6 +174,8 @@ private:
 		else 
 			vecBound = cnctVec.size() - 1;
 		for (unsigned i = 0; i < vecBound; ++i) {
+			if (cmdVec.at(i + 1)->getData().empty())
+				cmdVec.erase(cmdVec.begin() + i + 1);
 			cnctVec.at(i)->setCmd(cmdVec.at(i + 1));
 		}
 	}
