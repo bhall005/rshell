@@ -20,6 +20,7 @@
 #include "Executable.h"
 #include "Exit.h"
 #include "Test.h"
+#include "Paren.h"
 
 using namespace std;
 
@@ -27,18 +28,23 @@ class Executor {
 private:
 	vector<Command*> cmdVec; //Stores current set of Commands
 	vector<Connector*> cnctVec; //Stores current set of Connectors
+	vector<Paren*> prpVec; //Stores list of known parentheticals
 	char lgn[256]; //Stores userlogin
 	char hostName[256]; //Stores the host name
 
 	void parseInput(string input) {
 		stringstream lineStream(input);
 		char curChar;
+		bool testFlag = false;
+		int parenIndex = -1;
+		int cctLength = 0;
 		string newCommand;
 		string charBuffer;
 
 		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
-				&& curChar != '|' && curChar != '#') {
+				&& curChar != '|' && curChar != '#' && curChar != '['
+				&& curChar != '(' && curChar != ')') {
 				if (!charBuffer.empty() && newCommand.empty()) {
 					newCommand.push_back(curChar);
 					charBuffer.clear();
@@ -55,9 +61,10 @@ private:
 				charBuffer.push_back(curChar);
 			}
 			else if (curChar == ';' || curChar == '&'
-				|| curChar == '|' || curChar == '#') {
+				|| curChar == '|' || curChar == '#' 
+				|| curChar == '[' || curChar == '(') {
 				charBuffer.clear();
-				if (!newCommand.empty()) {
+				if (!newCommand.empty() || testFlag) {
 				      
 					if (newCommand == "exit") {
 						Command* tmp = new Exit();
@@ -89,14 +96,23 @@ private:
 	 			if (curChar == '|') {
 	 				Connector* tmp = new Or();
 	 				cnctVec.push_back(tmp);
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
 	 			}
 	 			else if (curChar == '&') {
 	 				Connector* tmp = new And();
 	 				cnctVec.push_back(tmp);
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
 	 			}
 	 			else if (curChar == ';') {
 	 				Connector* tmp = new Break();
 	 				cnctVec.push_back(tmp);
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
 	 			}
 	 			else if (curChar == '#') {
 	 				newCommand.clear();
@@ -105,10 +121,48 @@ private:
 
 	 			newCommand.clear();
 	 			charBuffer.clear();
+	 			testFlag = false;
+	 			}
+	 			else if (curChar == '[') {
+	 				string testCommand;
+	 				char flag = 'e';
+	 				while (lineStream >> noskipws >> curChar) {
+						if (curChar == '-') {
+							lineStream >> noskipws >> curChar;
+					    	flag = curChar;
+						}
+						else if (curChar != ' ' && curChar != ']')
+      						testCommand.push_back(curChar);
+      					else if (curChar == ']') {
+      						testFlag = true;
+      						break;
+      					}
+	 				}
+	 				Command *tmp = new Test(testCommand, flag);
+					cmdVec.push_back(tmp);
+
+					newCommand.clear();
+	 				charBuffer.clear();
+	 			}
+	 			else if(curChar == '(') {
+					parenIndex = cmdVec.size() - 1;
 	 			}
 	 			else
 	 				if (curChar == '#')
 	 					return;
+			}
+			if (curChar == ')' && parenIndex > -1) {
+				cout << "sadf" << endl;
+				Paren* parenTmp = new Paren();
+				parenTmp->setLength(cctLength);
+				cout << "sadf" << endl;
+				Command* tmp = parenTmp;
+				cmdVec.insert(cmdVec.begin() + parenIndex, tmp);
+				prpVec.push_back(parenTmp);
+				parenTmp->clearData();
+
+				cctLength = 0;
+				parenIndex = -1;
 			}
 		}
 		if (!newCommand.empty()) {
@@ -116,14 +170,46 @@ private:
 				Command* tmp = new Exit();
 				cmdVec.push_back(tmp);
 			}
+			else if (strncmp(newCommand.c_str(), "test", 4) == 0) {
+				char testCommand[] = "";
+			    unsigned i = 0;
+		        unsigned j = 5;
+				char flag = 'e';
+				while (newCommand[i + j] != '\0') {
+					if (newCommand[i + j] == '-') {
+					    flag = newCommand[i + j + 1];
+					    j += 3;
+					}
+					else {
+      					testCommand[i] = newCommand[i + j];
+      					i++;
+					}
+				}
+					      
+				Command *tmp = new Test(testCommand, flag);
+				cmdVec.push_back(tmp);
+			}
 			else {
 				Command* tmp = new Executable(newCommand);
 				cmdVec.push_back(tmp);
 			}
 	 	}
+
+	 	if (parenIndex > -1) {
+	 		Paren* parenTmp = new Paren();
+	 		parenTmp->setLength(cctLength);
+			Command* tmp = parenTmp;
+			cmdVec.insert(cmdVec.begin() + parenIndex, tmp);
+			prpVec.push_back(parenTmp);
+			parenTmp->clearData();
+				
+			cctLength = 0;
+			parenIndex = -1;
+		}
 	}
 
 	void fillConnectors() {
+		int parItr = 0;
 		if (cmdVec.empty())
 			return;
 		unsigned vecBound = 0;
@@ -132,7 +218,24 @@ private:
 		else 
 			vecBound = cnctVec.size() - 1;
 		for (unsigned i = 0; i < vecBound; ++i) {
+			if (cmdVec.at(i + 1)->getData().empty())
+				cmdVec.erase(cmdVec.begin() + i + 1);
 			cnctVec.at(i)->setCmd(cmdVec.at(i + 1));
+
+			if (cmdVec.at(i + 1)->isParen()) {
+				int parIndex = i + 1;
+				++i;
+				Paren* parTmp = prpVec.at(parItr);
+				parTmp->setFirst(cmdVec.at(i + 1));
+
+				for (int m = 0; m < parTmp->getLength(); ++m) {
+					cnctVec.at(i)->setCmd(cmdVec.at(i + 2));
+					parTmp->push_back(cnctVec.at(i));
+					++i;
+				}
+				cmdVec.at(parIndex) = parTmp;
+
+			}
 		}
 	}
 
@@ -172,6 +275,7 @@ public:
 		
 		cnctVec.clear();
 		cmdVec.clear();
+		prpVec.clear();
 	}
 };
 

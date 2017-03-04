@@ -9,6 +9,7 @@
 class Executable : public Command {
 public:
       Executable(string data) : Command(data) {}
+      bool isParen() { return false; }
       
       bool execute(){
             // Use the syscall fork() to create a child process to execute the command.
