@@ -10,6 +10,7 @@ public:
 	
 	// Virtual function execute() that will be implemented in Executable.h and Exit.h
 	virtual bool execute() = 0;
+	virtual bool isParen() = 0;
 };
 
 #endif

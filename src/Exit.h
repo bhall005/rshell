@@ -8,6 +8,7 @@
 class Exit : public Command {
 public:
 	Exit() : Command("exit") {}
+	bool isParen() { return false; }
 	bool execute() {
 		// Exit the shell
 		exit(0);
