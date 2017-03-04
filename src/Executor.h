@@ -39,12 +39,7 @@ private:
 
 		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
-<<<<<<< HEAD
 				&& curChar != '|' && curChar != '#' && curChar != '[') {
-=======
-				&& curChar != '|' && curChar != '#' && curChar != '('
-				&& curChar != ')' && curChar != '[' && curChar != ']') {
->>>>>>> 18a37546ee8b28d5793d9c14a5b1c320d133aa5f
 				if (!charBuffer.empty() && newCommand.empty()) {
 					newCommand.push_back(curChar);
 					charBuffer.clear();
@@ -56,51 +51,6 @@ private:
 				}
 				else
 					newCommand.push_back(curChar);
-			}
-			else if (curChar == '[') {
-			      string testCmd;
-			      while (lineStream >> noskipws >> curChar && curChar != ']') {
-			            testCmd.push_back(curChar);
-			      }
-			      
-			      char testCommand[] = "";
-			      char flag = 'e';
-			      bool pathBegins = false;
-			      
-			      unsigned i = 0;
-			      unsigned j = 0;
-			      
-			      while (testCmd[i + j] != '\0') {
-			            if(!pathBegins && testCmd[i + j] == ' ') {
-			                  j++;
-			            }
-			            else if(!pathBegins && testCmd[i + j] == '-' ){
-			                  flag = testCmd[i + j + 1];
-			                  j += 3;
-			                  pathBegins = true;
-			            }
-			            else {
-      			            testCommand[i] = testCmd[i + j];
-      			            i++;
-			            }
-			      }
-			      testCommand[i] = '\0';
-			      
-			      Command *tmp = new Test(testCommand, flag);
-			      cmdVec.push_back(tmp);
-			}
-			else if (curChar == '(') {
-			      char parenthetical[] = "";
-			      unsigned i = 0;
-			      while (lineStream >> noskipws >> curChar && curChar != ')') {
-			            parenthetical[i] = curChar;
-			            i++;
-			      }
-			      
-			      parenthetical[i] = '\0';
-			      cout << "parenthetical: " << parenthetical << endl;
-			      
-			      parseInput(parenthetical);
 			}
 			else if (curChar == ' ') {
 				charBuffer.push_back(curChar);
@@ -116,22 +66,19 @@ private:
 					}
 					else if (strncmp(newCommand.c_str(), "test", 4) == 0) {
 					      char testCommand[] = "";
-					      char flag = 'e';
-					      
 					      unsigned i = 0;
 					      unsigned j = 5;
-					      
-					      if (newCommand[5] == '-') {
-					            flag = newCommand[6];
-					            j += 3;
-					      }
-					      
+					      char flag = 'e';
 					      while (newCommand[i + j] != '\0') {
-					            testCommand[i] = newCommand[i + j];
-					            i++;
+					            if (newCommand[i + j] == '-') {
+					                  flag = newCommand[i + j + 1];
+					                  j += 3;
+					            }
+					            else {
+      					            testCommand[i] = newCommand[i + j];
+      					            i++;
+					            }
 					      }
-					      
-					      testCommand[i] = '\0';
 					      
 					      Command *tmp = new Test(testCommand, flag);
 					      cmdVec.push_back(tmp);
@@ -140,31 +87,22 @@ private:
 						Command* tmp = new Executable(newCommand);
 						cmdVec.push_back(tmp);
 					}
-					
-      	 			if (curChar == '|') {
-      	 				Connector* tmp = new Or();
-      	 				cnctVec.push_back(tmp);
-      	 			}
-      	 			else if (curChar == '&') {
-      	 				Connector* tmp = new And();
-      	 				cnctVec.push_back(tmp);
-      	 			}
-      	 			else if (curChar == ';') {
-      	 				Connector* tmp = new Break();
-      	 				cnctVec.push_back(tmp);
-      	 			}
-      	 			else if (curChar == '#') {
-      	 				newCommand.clear();
-      	 				return;
-      	 			}
-      
-      	 			newCommand.clear();
-      	 			charBuffer.clear();
+	 			if (curChar == '|') {
+	 				Connector* tmp = new Or();
+	 				cnctVec.push_back(tmp);
+	 			}
+	 			else if (curChar == '&') {
+	 				Connector* tmp = new And();
+	 				cnctVec.push_back(tmp);
+	 			}
+	 			else if (curChar == ';') {
+	 				Connector* tmp = new Break();
+	 				cnctVec.push_back(tmp);
 	 			}
 	 			else if (curChar == '#') {
-	 			      return;
+	 				newCommand.clear();
+	 				return;
 	 			}
-<<<<<<< HEAD
 
 	 			newCommand.clear();
 	 			charBuffer.clear();
@@ -194,8 +132,6 @@ private:
 	 			else
 	 				if (curChar == '#')
 	 					return;
-=======
->>>>>>> 18a37546ee8b28d5793d9c14a5b1c320d133aa5f
 			}
 		}
 		if (!newCommand.empty()) {
@@ -269,10 +205,8 @@ public:
 
 	void execute() {
 		bool lastPass = false;
-		if (cmdVec.size() > 0) {
-		   
+		if (cmdVec.size() > 0)
 			lastPass = cmdVec.at(0)->execute();
-		}
 
 		if (cnctVec.size() > 0) {
 			for(unsigned i = 0; i < cnctVec.size(); i++) {
