@@ -11,3 +11,4 @@ This program prints a command prompt and reads in a line of commands. The comman
 ---
 
 * Currently, the program only accepts command lines with proper syntax. Inputting a command line with typing errors or a command line that does not follow the expected format of surrounding every connector by arguments will result in errors or the commands not being run correctly.
+* Currently, the precedence functionality is not completed. Using parentheses in a command line may result in a segmentation fault.
