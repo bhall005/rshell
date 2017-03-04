@@ -116,6 +116,25 @@ private:
 				Command* tmp = new Exit();
 				cmdVec.push_back(tmp);
 			}
+			else if (strncmp(newCommand.c_str(), "test", 4) == 0) {
+				char testCommand[] = "";
+			    unsigned i = 0;
+		        unsigned j = 5;
+				char flag = 'e';
+				while (newCommand[i + j] != '\0') {
+					if (newCommand[i + j] == '-') {
+					    flag = newCommand[i + j + 1];
+					    j += 3;
+					}
+					else {
+      					testCommand[i] = newCommand[i + j];
+      					i++;
+					}
+				}
+					      
+				Command *tmp = new Test(testCommand, flag);
+				cmdVec.push_back(tmp);
+			}
 			else {
 				Command* tmp = new Executable(newCommand);
 				cmdVec.push_back(tmp);
