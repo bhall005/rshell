@@ -14,6 +14,7 @@
 #include "Input.h"
 #include "Command.h"
 #include "Connector.h"
+#include "Pipe.h"
 #include "And.h"
 #include "Break.h"
 #include "Or.h"
@@ -29,6 +30,7 @@ private:
 	vector<Command*> cmdVec; //Stores current set of Commands
 	vector<Connector*> cnctVec; //Stores current set of Connectors
 	vector<Paren*> prpVec; //Stores list of known parentheticals
+	Pipe* tmpPipe = NULL; //buffer for a new Pipe command that needs a right
 	char lgn[256]; //Stores userlogin
 	char hostName[256]; //Stores the host name
 
@@ -44,7 +46,8 @@ private:
 		while (lineStream >> noskipws >> curChar) {
 			if (curChar != ' ' && curChar != ';' && curChar != '&'
 				&& curChar != '|' && curChar != '#' && curChar != '['
-				&& curChar != '(' && curChar != ')') {
+				&& curChar != '(' && curChar != ')'
+				&& curChar != '>' && curChar != '<') {
 				if (!charBuffer.empty() && newCommand.empty()) {
 					newCommand.push_back(curChar);
 					charBuffer.clear();
@@ -62,11 +65,69 @@ private:
 			}
 			else if (curChar == ';' || curChar == '&'
 				|| curChar == '|' || curChar == '#' 
-				|| curChar == '[' || curChar == '(') {
+				|| curChar == '[' || curChar == '('
+				|| curChar == '<' || curChar == '>') {
 				charBuffer.clear();
 				if (!newCommand.empty() || testFlag) {
-				      
-					if (newCommand == "exit") {
+					if (curChar == '|') {
+	 				lineStream >> noskipws >> curChar;
+	 				if (curChar == '|') {
+	 					Connector* tmp = new Or();
+	 					cnctVec.push_back(tmp);
+	 				}
+	 				else {
+	 					tmpPipe = new Pipe("|", newCommand);
+	 					newCommand.clear();
+	 					charBuffer.clear();
+	 				}
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
+	 			}
+	 			else if (curChar == '>') {
+	 				lineStream >> noskipws >> curChar;
+	 				if (curChar == '>') {
+	 					tmpPipe = new Pipe(">>", newCommand);
+	 				}
+	 				else {
+	 					tmpPipe = new Pipe(">", newCommand);
+	 				}
+	 				newCommand.clear();
+	 				charBuffer.clear();
+	 			}
+	 			else if (curChar == '<') {
+	 				tmpPipe = new Pipe("<", newCommand);
+	 				newCommand.clear();
+	 				charBuffer.clear();
+	 			}
+	 			else if (curChar == '&') {
+	 				Connector* tmp = new And();
+	 				cnctVec.push_back(tmp);
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
+	 			}
+	 			else if (curChar == ';') {
+	 				Connector* tmp = new Break();
+	 				cnctVec.push_back(tmp);
+
+	 				if (parenIndex > -1)
+	 					cctLength++;
+	 			}
+	 			else if (curChar == '#') {
+	 				newCommand.clear();
+	 				return;
+	 			}
+
+	 			if (!newCommand.empty()) {
+
+				    if (tmpPipe != NULL) {
+				    	tmpPipe->setRight(newCommand);
+				    	newCommand.clear();
+				    	cmdVec.push_back(tmpPipe);
+				    	tmpPipe = NULL;
+				    }  
+					else if (newCommand == "exit") {
 						Command* tmp = new Exit();
 						cmdVec.push_back(tmp);
 					}
@@ -93,31 +154,6 @@ private:
 						Command* tmp = new Executable(newCommand);
 						cmdVec.push_back(tmp);
 					}
-	 			if (curChar == '|') {
-	 				Connector* tmp = new Or();
-	 				cnctVec.push_back(tmp);
-
-	 				if (parenIndex > -1)
-	 					cctLength++;
-	 			}
-	 			else if (curChar == '&') {
-	 				Connector* tmp = new And();
-	 				cnctVec.push_back(tmp);
-
-	 				if (parenIndex > -1)
-	 					cctLength++;
-	 			}
-	 			else if (curChar == ';') {
-	 				Connector* tmp = new Break();
-	 				cnctVec.push_back(tmp);
-
-	 				if (parenIndex > -1)
-	 					cctLength++;
-	 			}
-	 			else if (curChar == '#') {
-	 				newCommand.clear();
-	 				return;
-	 			}
 
 	 			newCommand.clear();
 	 			charBuffer.clear();
@@ -151,6 +187,7 @@ private:
 	 				if (curChar == '#')
 	 					return;
 			}
+		}
 			if (curChar == ')' && parenIndex > -1) {
 				Paren* parenTmp = new Paren();
 				parenTmp->setLength(cctLength);
@@ -187,6 +224,12 @@ private:
 				Command *tmp = new Test(testCommand, flag);
 				cmdVec.push_back(tmp);
 			}
+			else if (tmpPipe != NULL) {
+		    	tmpPipe->setRight(newCommand);
+		    	newCommand.clear();
+		    	cmdVec.push_back(tmpPipe);
+		    	tmpPipe = NULL;
+			}  
 			else {
 				Command* tmp = new Executable(newCommand);
 				cmdVec.push_back(tmp);
@@ -207,36 +250,16 @@ private:
 	}
 
 	void fillConnectors() {
-		int parItr = 0;
 		if (cmdVec.empty())
 			return;
 		unsigned vecBound = 0;
 		if (cmdVec.size() > cnctVec.size())
-			vecBound = cmdVec.size() - 1;
+			vecBound = cnctVec.size();
 		else 
 			vecBound = cnctVec.size() - 1;
 		for (unsigned i = 0; i < vecBound; ++i) {
-			if (cmdVec.at(i + 1)->getData().empty())
-				cmdVec.erase(cmdVec.begin() + i + 1);
 			cnctVec.at(i)->setCmd(cmdVec.at(i + 1));
-
-			if (cmdVec.at(i + 1)->isParen()) {
-				int parIndex = i + 1;
-				++i;
-				Paren* parTmp = prpVec.at(parItr);
-				Command* newFirst = cmdVec.at(i + 1);
-				cout << newFirst->getData() << endl;
-				parTmp->setFirst(newFirst);
-
-				for (int m = 0; m < parTmp->getLength(); ++m) {
-					cnctVec.at(i)->setCmd(cmdVec.at(i + 2));
-					parTmp->push_back(cnctVec.at(i));
-					++i;
-				}
-				cmdVec.at(parIndex) = parTmp;
-
-			}
-		}
+}
 	}
 
 public:
