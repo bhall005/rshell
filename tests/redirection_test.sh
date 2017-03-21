@@ -18,3 +18,5 @@ A-Z > newOutputFile2
 
 echo "Testing multiple lines"
 echo how are you >> file1 | tr a-z A-Z
+echo ls -a | grep Make | grep a | cat < file1
+echo cat < file1 | tr A-Z a-z | tee file2 | tr a-z A-Z >> file2
