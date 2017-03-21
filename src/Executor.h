@@ -38,6 +38,7 @@ private:
 		stringstream lineStream(input);
 		char curChar;
 		bool testFlag = false;
+		bool keepPipe = false;
 		int parenIndex = -1;
 		int cctLength = 0;
 		string newCommand;
@@ -74,40 +75,43 @@ private:
 	 				if (curChar == '|') {
 	 					Connector* tmp = new Or();
 	 					cnctVec.push_back(tmp);
+	 					keepPipe = false;
 	 				}
 	 				else {
-	 					tmpPipe = new Pipe("|", newCommand);
-	 					newCommand.clear();
-	 					charBuffer.clear();
+	 					keepPipe = true;
 	 				}
 
 	 				if (parenIndex > -1)
 	 					cctLength++;
 	 			}
 	 			else if (curChar == '>') {
-	 				lineStream >> noskipws >> curChar;
-	 				if (curChar == '>') {
-	 					tmpPipe = new Pipe(">>", newCommand);
-	 				}
-	 				else {
-	 					tmpPipe = new Pipe(">", newCommand);
-	 				}
-	 				newCommand.clear();
-	 				charBuffer.clear();
+	 				// lineStream >> noskipws >> curChar;
+	 				keepPipe = true;
+	 				// if (curChar == '>') {
+	 				// 	tmpPipe = new Pipe(">>", newCommand);
+	 				// }
+	 				// else {
+	 				// 	tmpPipe = new Pipe(">", newCommand);
+	 				// }
+	 				// newCommand.clear();
+	 				// charBuffer.clear();
 	 			}
 	 			else if (curChar == '<') {
-	 				tmpPipe = new Pipe("<", newCommand);
-	 				newCommand.clear();
-	 				charBuffer.clear();
+	 				// tmpPipe = new Pipe("<", newCommand);
+	 				// newCommand.clear();
+	 				// charBuffer.clear();
+	 				keepPipe = true;
 	 			}
 	 			else if (curChar == '&') {
 	 				Connector* tmp = new And();
 	 				cnctVec.push_back(tmp);
+	 				keepPipe = false;
 
 	 				if (parenIndex > -1)
 	 					cctLength++;
 	 			}
 	 			else if (curChar == ';') {
+	 				keepPipe = false;
 	 				Connector* tmp = new Break();
 	 				cnctVec.push_back(tmp);
 
@@ -119,7 +123,7 @@ private:
 	 				return;
 	 			}
 
-	 			if (!newCommand.empty()) {
+	 			if (!newCommand.empty() && !keepPipe) {
 
 				    if (tmpPipe != NULL) {
 				    	tmpPipe->setRight(newCommand);
@@ -287,6 +291,8 @@ public:
 
 	void execute() {
 		bool lastPass = false;
+		cout << cmdVec.size() << endl;
+		cout << cnctVec.size() << endl;
 		if (cmdVec.size() > 0)
 			lastPass = cmdVec.at(0)->execute();
 
